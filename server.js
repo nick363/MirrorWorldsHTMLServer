@@ -36,7 +36,7 @@ function handler (req, res)
   });
 }
 
-io.sockets.on('connection', function (socket)
+io.on('connection', function (socket)
 { // Define socket events
   console.log("new connection");
   socket.on('newconnection', function()
@@ -44,9 +44,13 @@ io.sockets.on('connection', function (socket)
       // Recieved when a new client opens a websocket connection succesfully.
       // Add the new client to the list of all clients.
       console.log("New user is connecting...");
-
-      socket.emit('firstupdate', users);
-    })
+	try {
+      io.emit('firstupdate', users);
+    } catch (e) {
+		console.log(e);
+	}
+	}
+	)
 
   socket.on('login', function(name, pos, rot)
   {
@@ -57,7 +61,11 @@ io.sockets.on('connection', function (socket)
     users[name] = [name, pos, rot];
 
     // Inform all clients to update and account for the new user.
-    io.sockets.emit('newuser', users[name]);
+	try {
+		io.emit('newuser', users[name], users);
+	} catch (e) {
+		console.log(e);
+	}
   });
 
   socket.on('updateposition', function(name, pos, rot)
@@ -70,7 +78,11 @@ io.sockets.on('connection', function (socket)
     users[name] = [name, pos, rot];
 
     // Inform all clients to update with the new list.
-    io.sockets.emit('update', users[name]);
+	try {
+		io.emit('update', users[name]);
+	} catch (e) {
+		console.log(e);
+	}
   });
 
   socket.on('disconnect', function()
@@ -79,11 +91,9 @@ io.sockets.on('connection', function (socket)
     console.log("User '" + socket.username + "' disconnected");
 
     // Inform all clients to update and account for the removed user.
-    io.sockets.emit('deleteuser', users[socket.username]);
+    io.emit('deleteuser', users[socket.username]);
 
     // Remove the client from the master list
     delete users[socket.username];
   });
-  
-
 });

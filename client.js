@@ -5,16 +5,20 @@ var sh;
 
 function init()
 {
-	sh = new x3domWebsocketClient(buildList, addUser, remUser, updateList);
+	sh = new x3domWebsocketClient();
 }
 
 var buildList = function(data)
 {
+
 	var userList = document.getElementById("users");
+	console.log("userList:", userList)
 	userList.innerHTML = "";
 
+	
 	for (var key in data)
 	{
+		console.log("Building List For: ", data[key]);
 		var current = data[key];
 		var userListEntry = document.createElement('span');
 		var br = document.createElement('br');
@@ -27,6 +31,7 @@ var buildList = function(data)
 
 var addUser = function(data)
 {
+	console.log("Adding User: ", data[0]);
 	var userList = document.getElementById("users");
 	var userListEntry = document.createElement('span');
 	var br = document.createElement('br');
@@ -45,8 +50,6 @@ var remUser = function(data)
 
 var updateList = function(data)
 {
-	console.log(data);
-	console.log(data[0]);
 	var target = document.getElementById(data[0]);
 	target.innerHTML = (data[0] + " observing at: " + data[1].x + ", " + data[1].y + ", " + data[1].z);
 }
