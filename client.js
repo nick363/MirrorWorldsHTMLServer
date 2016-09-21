@@ -41,10 +41,10 @@ var buildList = function(fullListOfUsers)
 	{
 		var current = fullListOfUsers[key];
 		var userListEntry = document.createElement('span');
-		var br = document.createElement('br');
+		var newPLine = document.createElement('p');
 		userListEntry.setAttribute("id", key);
 		userListEntry.innerHTML = (key + " observing at: " + current[1].x + ", " + current[1].y + ", " + current[1].z);
-		userList.appendChild(br);					
+		userList.appendChild(newPLine);					
 		userList.appendChild(userListEntry);
 	}
 }
@@ -59,10 +59,10 @@ var addUser = function(newestUser)
 	console.log("Adding User: ", newestUser[0]);
 	var userList = document.getElementById("users");
 	var userListEntry = document.createElement('span');
-	var br = document.createElement('br');
+	var newPLine = document.createElement('p');
 	userListEntry.setAttribute("id", newestUser[0]);
 	userListEntry.innerHTML = (newestUser[0] + " observing at: " + newestUser[1].x + ", " + newestUser[1].y + ", " + newestUser[1].z);
-	userList.appendChild(br);
+	userList.appendChild(newPLine);
 	userList.appendChild(userListEntry);
 }
 
