@@ -103,7 +103,11 @@ socket.once('firstupdate', function(fullListOfUsers)
 	{
 		var current = fullListOfUsers[key];
 		var userAvatar = document.createElement('Transform');
-		userAvatar.setAttribute("translation", current[1].x + " " + current[1].y +  " " + current[1].z);
+		
+		var startX = current[1].x + 2;
+		var startY = current[1].y + 2;
+		
+		userAvatar.setAttribute("translation", startX + " " + startY + " " + current[1].z);
 		userAvatar.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
 		userAvatar.setAttribute("id", key + "Avatar");
 		console.log("created Node: " + userAvatar.getAttribute("id"));
@@ -136,8 +140,27 @@ socket.on('update', function(updatedUser)
 
 	if(userAvatar != null)
 	{
+		//get camera position
+		var cPos = "" + updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z;
+		var cRot = "" + updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]
+		
+		var avatarX = updatedUser[1].x;
+		var avatarY = updatedUser[1].y + 5;
+		var avatarZ = updatedUser[1].z + 5;		
+		
+		//figure out which way camera is facing
+		//if(updatedUser[2][0].x < 0) {
+		//	avatarX -= 10;
+		//}
+		if(updatedUser[2][0].y < 0) {
+			avatarY -= 10;
+		}
+		if(updatedUser[2][0].z < 0) {
+			avatarZ -= 10;
+		}
+		
 		//Update Avatar Data
-		userAvatar.setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
+		userAvatar.setAttribute("translation", avatarX + " " + avatarY + " " + avatarZ);
 		userAvatar.setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
 		
         //Update HTML
@@ -173,8 +196,7 @@ socket.on('newuser', function(newestUser)
 
 		var inlineElement = document.createElement('inline');
 		inlineElement.setAttribute("url", "pumbaPTrans1.x3d");
-		inlineElement.setAttribute("mapDEFToID", "true");
-
+		
 		userAvatar.appendChild(inlineElement);
 		hook.appendChild(userAvatar);
         

@@ -86,5 +86,6 @@ var removeUser = function(goodbyeUser)
 var updateList = function(updateUser)
 {
 	var target = document.getElementById(updateUser[0]);
-	target.innerHTML = (updateUser[0] + " observing at: " + updateUser[1].x + ", " + updateUser[1].y + ", " + updateUser[1].z);
+	target.innerHTML = (updateUser[0] + " observing at: " + updateUser[1].x + ", " + updateUser[1].y + ", " + updateUser[1].z + "<br>"
+		+ "rotation: " + updateUser[2][0].x + " " + updateUser[2][0].y + " " + updateUser[2][0].z + " " + updateUser[2][1]);
 }
