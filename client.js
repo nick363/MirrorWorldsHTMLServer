@@ -1,52 +1,91 @@
-/* 
- * The client end of the x3dom web system
- */
-var sh;
+/**********************************************
+ * Strictly handles client side HTML updates
+ *
+ * edited by: Karsten Dees, Nick Hu {09/16/2016}
+ **********************************************/
 
+//-----------------------------
+// Data Fields
+//-----------------------------
+ 
+var clientSocket;
+
+//-----------------------------
+// Initialize Function
+//-----------------------------
+
+/*
+ * Start up client side operations
+ */
 function init()
 {
-	sh = new x3domWebsocketClient(buildList, addUser, remUser, updateList);
+	clientSocket = new x3domWebsocketClient();
 }
 
-var buildList = function(data)
+//-----------------------------
+// HTML Manipulators
+//-----------------------------
+
+/*
+ * Builds HTML list of connected users
+ *
+ * @param fullListOfUsers - the list of connected users
+ */
+var buildList = function(fullListOfUsers)
 {
 	var userList = document.getElementById("users");
 	userList.innerHTML = "";
 
-	for (var key in data)
+	//Add each user to the HTML list
+	for (var key in fullListOfUsers)
 	{
-		var current = data[key];
+		var current = fullListOfUsers[key];
 		var userListEntry = document.createElement('span');
-		var br = document.createElement('br');
+		var newPLine = document.createElement('p');
 		userListEntry.setAttribute("id", key);
 		userListEntry.innerHTML = (key + " observing at: " + current[1].x + ", " + current[1].y + ", " + current[1].z);
-		userList.appendChild(br);					
+		userList.appendChild(newPLine);					
 		userList.appendChild(userListEntry);
 	}
 }
 
-var addUser = function(data)
+/*
+ * Adds a new user to the HTML list of users
+ *
+ * @param newestUser - user to be added to the list
+ */
+var addUser = function(newestUser)
 {
+	console.log("Adding User: ", newestUser[0]);
 	var userList = document.getElementById("users");
 	var userListEntry = document.createElement('span');
-	var br = document.createElement('br');
-	userListEntry.setAttribute("id", data[0]);
-	userListEntry.innerHTML = (data[0] + " observing at: " + data[1].x + ", " + data[1].y + ", " + data[1].z);
-	userList.appendChild(br);
+	var newPLine = document.createElement('p');
+	userListEntry.setAttribute("id", newestUser[0]);
+	userListEntry.innerHTML = (newestUser[0] + " observing at: " + newestUser[1].x + ", " + newestUser[1].y + ", " + newestUser[1].z);
+	userList.appendChild(newPLine);
 	userList.appendChild(userListEntry);
 }
 
-var remUser = function(data)
+/*
+ * Removes a user from the HTML list of users
+ *
+ * @param goodbyeUser - user to be deleted
+ */
+var removeUser = function(goodbyeUser)
 {
 	var users = document.getElementById("users");
-	var remove2 = document.getElementById(data[0]);
+	var remove2 = document.getElementById(goodbyeUser[0]);
 	users.removeChild(remove2);
 }
 
-var updateList = function(data)
+/*
+ * Updates the HTML list with new position data
+ *
+ * @param updateUser - the updated user
+ */
+var updateList = function(updateUser)
 {
-	console.log(data);
-	console.log(data[0]);
-	var target = document.getElementById(data[0]);
-	target.innerHTML = (data[0] + " observing at: " + data[1].x + ", " + data[1].y + ", " + data[1].z);
+	var target = document.getElementById(updateUser[0]);
+	target.innerHTML = (updateUser[0] + " observing at: " + updateUser[1].x + ", " + updateUser[1].y + ", " + updateUser[1].z + "<br>"
+		+ "rotation: " + updateUser[2][0].x + " " + updateUser[2][0].y + " " + updateUser[2][0].z + " " + updateUser[2][1]);
 }
