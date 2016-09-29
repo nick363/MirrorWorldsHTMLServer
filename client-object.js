@@ -14,7 +14,7 @@
  
 var name;
 var socket;
-var spawnPosition = {"x": 2, "y": 1.5, "z": 9};
+var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
 var x3d;
 
@@ -23,7 +23,7 @@ var x3d;
 //socket = new io.Socket("http://dev.mirrorworlds.icat.vt.edu:8888",{ port: 8888 });
 
 //Use for localhost testing. Run node server 
-socket = new io.connect('http://metagrid2.sv.vt.edu:8888');
+socket = new io.connect('http://metagrid2.sv.vt.edu:9999');
 
 /*
  * Initialized by client.js to get the user's name
@@ -66,7 +66,8 @@ function configureScene()
  * Sends position data to server
  */
 function positionUpdated(e)
-{			
+{	
+	console.log("2");
 	var pos = e.position;
     var rot = e.orientation;
     
@@ -84,6 +85,7 @@ function positionUpdated(e)
  */
 socket.once('connect', function()
 {
+	console.log("3");
 	socket.emit('newconnection');
 });
 
@@ -95,27 +97,63 @@ socket.once('connect', function()
  */
 socket.once('firstupdate', function(fullListOfUsers)
 {
+	console.log("4");
 	// Adds Avatar to X3D scene for new user
 	var hook = document.getElementById("avatarGroup");
 	hook.innerHTML = "";
 	
+	var scene = document.getElementsByTagName("Scene")[0];
 	for (var key in fullListOfUsers)
 	{
 		var current = fullListOfUsers[key];
-		var userAvatar = document.createElement('Transform');
-		
-		var startX = current[1].x + 2;
-		var startY = current[1].y + 2;
-		
-		userAvatar.setAttribute("translation", startX + " " + startY + " " + current[1].z);
-		userAvatar.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
-		userAvatar.setAttribute("id", key + "Avatar");
-		console.log("created Node: " + userAvatar.getAttribute("id"));
-		var i = document.createElement('inline');
-		i.setAttribute("url", "pumbaPTrans1.x3d");
+		//Adding yourself to the Scene
+		if(current[0] === name) {
+			console.log("Creating my own UserBundle");
+			var userBundle = document.createElement('Transform');
+			userBundle.setAttribute("id", key + "Bundle");
+			userBundle.setAttribute("translation", current[1].x + " " + current[1].y + " " + current[1].z);
+			userBundle.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
+			
+			scene.appendChild(userBundle);
+			
+			var userCam = document.createElement('Viewpoint');
+			
+			var cPos = "" + 0 + " " + 0 + " " + 0;
+			var cRot = "" + 0 + " " + 0 + " " + 0 + " " + 0;
+			
+			userCam.setAttribute("position", cPos);
+			userCam.setAttribute("orientation", cRot);
+			userCam.setAttribute("id", key + "Camera");
+			userCam.setAttribute('set_bind','true');
+			userCam.addEventListener('viewpointChanged', positionUpdated, false);
+			userBundle.appendChild(userCam);
+			
+			var userAvatar = document.createElement('Transform');
+			
+			userAvatar.setAttribute("translation", "" + 0 + " " + 0 + " " + 5);
+			userAvatar.setAttribute("rotation", "" + 0 + " " + 0 + " " + 0 + " " + 0);
+			userAvatar.setAttribute("id", key + "Avatar"); 
+			console.log("created Node: " + userAvatar.getAttribute("id"));
+			var characterOfAvatar = document.createElement('inline');
+			characterOfAvatar.setAttribute("url", "pumbaPTrans1.x3d");
+			
+			userAvatar.appendChild(characterOfAvatar);
+			userBundle.appendChild(userAvatar);
+			
+		} else {
+			var userAvatar = document.createElement('Transform');
+			
+			userAvatar.setAttribute("translation", current[1].x + " " + current[1].y + " " + current[1].z);
+			userAvatar.setAttribute("rotation", current[2][0].x + " " + current[2][0].y + " " + current[2][0].z + " " + current[2][1]);
+			userAvatar.setAttribute("id", key + "Avatar");
+			console.log("created Node: " + userAvatar.getAttribute("id"));
+			var characterOfAvatar = document.createElement('inline');
+			characterOfAvatar.setAttribute("url", "pumbaPTrans1.x3d");
 
-		userAvatar.appendChild(i);
-		hook.appendChild(userAvatar);
+			userAvatar.appendChild(characterOfAvatar);
+			hook.appendChild(userAvatar);
+		}
+		
 	}
     
 	//Build the list of connected users
@@ -133,34 +171,31 @@ socket.once('firstupdate', function(fullListOfUsers)
  */
 socket.on('update', function(updatedUser)
 {
-	console.log("Update Fired");
+	//console.log("5");
+	//console.log("Update Fired");
 	
-	// Update the scene
+	//Get User Bundle Data
+	var userBundle = document.getElementById(updatedUser[0] + "Bundle");
+	
+	// Get Avatar Data
 	var userAvatar = document.getElementById(updatedUser[0] + "Avatar");
-
-	if(userAvatar != null)
+	
+	if(userBundle != null)
 	{
-		//get camera position
-		var cPos = "" + updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z;
-		var cRot = "" + updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]
-		
-		var avatarX = updatedUser[1].x;
-		var avatarY = updatedUser[1].y + 5;
-		var avatarZ = updatedUser[1].z + 5;		
-		
-		//figure out which way camera is facing
-		//if(updatedUser[2][0].x < 0) {
-		//	avatarX -= 10;
-		//}
-		if(updatedUser[2][0].y < 0) {
-			avatarY -= 10;
-		}
-		if(updatedUser[2][0].z < 0) {
-			avatarZ -= 10;
-		}
-		
+		//Update Bundle Data
+		userBundle.setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
+		userBundle.setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
+				
+        //Update HTML
+        updateList(updatedUser);
+    
+        //Update Server Location Information
+        socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
+	} else if(userAvatar != null)
+	{
+	
 		//Update Avatar Data
-		userAvatar.setAttribute("translation", avatarX + " " + avatarY + " " + avatarZ);
+		userAvatar.setAttribute("translation", updatedUser[1].x + " " + updatedUser[1].y + " " + updatedUser[1].z);
 		userAvatar.setAttribute("rotation", updatedUser[2][0].x + " " + updatedUser[2][0].y + " " + updatedUser[2][0].z + " " + updatedUser[2][1]);
 		
         //Update HTML
@@ -168,7 +203,7 @@ socket.on('update', function(updatedUser)
     
         //Update Server Location Information
         socket.emit('updatePosition', updatedUser[0], updatedUser[1], updatedUser[2]);
-	};
+	}
 });
 
 /*
@@ -180,6 +215,7 @@ socket.on('update', function(updatedUser)
  */
 socket.on('newuser', function(newestUser)
 {
+	
 	var duplicateNames = document.getElementById(newestUser[0]);
 	
 	if(newestUser[0] != null && name != newestUser[0] && duplicateNames == null)
@@ -192,6 +228,7 @@ socket.on('newuser', function(newestUser)
 		userAvatar.setAttribute("translation", newestUser[1].x + " " + newestUser[1].y + " " + newestUser[1].z);
 		userAvatar.setAttribute("rotation", newestUser[2][0].x + " " + newestUser[2][0].y + " " + newestUser[2][0].z + " " + newestUser[2][1]);
 		userAvatar.setAttribute("id", newestUser[0] + "Avatar");
+		console.log("6");
 		console.log("Created node: " + userAvatar.getAttribute("id"));
 
 		var inlineElement = document.createElement('inline');
@@ -213,6 +250,7 @@ socket.on('newuser', function(newestUser)
  */
 socket.on('deleteuser', function(removableUser)
 {
+	console.log("7");
 	// Remove the avatar from the scene.
 	var removeAvatar = document.getElementById(removableUser[0] + "Avatar");
 

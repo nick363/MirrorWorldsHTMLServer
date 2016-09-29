@@ -19,7 +19,7 @@ var app = require('http').createServer(handler)
 
 var users = {}; //List of Connected Users
 
-app.listen(8888);
+app.listen(9999);
 
 /*
  * Handle incorrect Path Names for the server connection
@@ -98,6 +98,7 @@ io.on('connection', function (socket)
   */
   socket.on('updateposition', function(name, pos, rot)
   {
+	  console.log("UpdatingPosition: ", name);
     // Update the master list with the client's new location.
     users[name] = [name, pos, rot];
 
