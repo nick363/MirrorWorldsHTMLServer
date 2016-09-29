@@ -13,10 +13,12 @@
 //-----------------------------
  
 var name;
+var bundleObj;
 var socket;
 var spawnPosition = {"x": 2, "y": 1.5, "z": 1};
 var spawnOrientation = [{"x": 0, "y": 1, "z": 0}, 0];
 var x3d;
+var currCameraPosition = 0;
 
 //socket = new io.connect('http://dev.mirrorworlds.icat.vt.edu:9000');
 //Use to connect to mirrorworlds server
@@ -46,6 +48,10 @@ function x3domWebsocketClient()
 function configureScene()
 {
 	console.log("Scene Configured");
+	
+	bundleObj = [name, spawnPosition, spawnOrientation];
+	console.log(bundleObj);
+	
 	var camera = x3d.runtime.getActiveBindable("Viewpoint");
 	var cPos = "" + spawnPosition.x + " " + spawnPosition.y + " " + spawnPosition.z;
 	var cRot = "" + spawnOrientation[0].x + " " + spawnOrientation[0].y + " " + spawnOrientation[0].z + " " + spawnOrientation[1];
@@ -89,6 +95,26 @@ socket.once('connect', function()
 	socket.emit('newconnection');
 });
 
+
+window.addEventListener('keypress', function(e) {
+	if(e.keyCode === 111) {
+		var bundle = document.getElementById(name+"Avatar");
+		console.log(bundle);
+		if (currCameraPosition === 0) {
+			bundle.setAttribute("translation", "" + 0 + " " + -2 + " " + -10);
+			currCameraPosition = 1;
+		} else if (currCameraPosition === 1) {
+			bundle.setAttribute("translation", "" + 0 + " " + 0 + " " + 5);
+			currCameraPosition = 0;
+		}
+		
+	}
+	
+}, false);
+
+
+
+
 /*
  * Received the first time this client connects to the server -- gets 
  * the client up to speed with all of the current data
@@ -98,6 +124,14 @@ socket.once('connect', function()
 socket.once('firstupdate', function(fullListOfUsers)
 {
 	console.log("4");
+	console.log("FullListOfUsers", fullListOfUsers);
+	console.log(fullListOfUsers[0] === undefined);
+	//Add your own Name and information to fullListOfUsers
+	if(fullListOfUsers[0] === undefined) {
+		console.log("adding bundleObj");
+		fullListOfUsers[name] = bundleObj;
+	}
+	
 	// Adds Avatar to X3D scene for new user
 	var hook = document.getElementById("avatarGroup");
 	hook.innerHTML = "";
@@ -215,7 +249,7 @@ socket.on('update', function(updatedUser)
  */
 socket.on('newuser', function(newestUser)
 {
-	
+	console.log(newestUser);
 	var duplicateNames = document.getElementById(newestUser[0]);
 	
 	if(newestUser[0] != null && name != newestUser[0] && duplicateNames == null)
