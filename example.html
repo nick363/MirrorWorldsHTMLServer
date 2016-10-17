@@ -1,18 +1,21 @@
 <!DOCTYPE html>
-
 <html>
-
 <head>
 	<title>X3DOM server testing</title>
 	<meta encoding="utf-8">
 	
-	<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script>
-    <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'/>
-
+	<script type='text/javascript' src='http://www.x3dom.org/download/x3dom.js'> </script> 
+    <link rel='stylesheet' type='text/css' href='http://www.x3dom.org/download/x3dom.css'></link>
+	<link rel="stylesheet" type="text/css" href="client.css">
 	
 	<script src="https://cdn.socket.io/socket.io-1.0.0.js"></script>
 	<script src="client-object.js"></script>
 	<script src="client.js"></script>
+	<style>
+
+	</style>
+	
+
 </head>
 
 <body onload = "init()">
@@ -22,7 +25,6 @@
 	
 		<X3D width="1024px" height="768px">
 			<Scene>
-			
 			<Transform DEF='dad_Box1'
 			 translation='0 -.5 0'>
 			 <Shape DEF='Box1'
@@ -58,7 +60,7 @@
 			 </Shape>
 			</Transform>
 			<Transform DEF='dad_Sphere1'
-			 translation='0 5 0'>
+			 translation='0 0 0'>
 			 <Shape DEF='Sphere1'
 			  containerField='children'>
 			  <Appearance
@@ -109,9 +111,12 @@
 			   size='2 12 2'/>
 			 </Shape>
 			</Transform>
-			<Viewpoint
-			 position='32.7139 13.617 -20.0905'
-			 orientation='-.076 .994 .081 2.184'/>
+			<Viewpoint id="firstPerson" set_bind="true" position='2 1.5 5' orientation='0 1 0 0'></Viewpoint>
+			<Viewpoint id="thirdPerson"
+			 position='2 1.5 -5'
+			 orientation='0 1 0 0'></Viewpoint>
+			 <timeSensor DEF="time" cycleInterval="2" loop=""true"> </timeSensor>       
+			 <PositionInterpolator DEF="move" onoutputchange="positionUpdated(event)" key="0 0.5 1" keyValue="0 0 0  0 3 0  0 0 0"> </PositionInterpolator> 
 			</Scene>
 		</X3D>
 	</div>
@@ -122,6 +127,12 @@
 		<b>People currently observing this model:</b>
 		<span id="users">Loading...</span>
 	</div>
+	
+	<form id="chatWindow">
+		<ul id="messages"></ul>
+		<input id="m" autocomplete="off" /><button id="sendButton">Send</button>
+	</form>
+	
 </body>
 
 </html>
